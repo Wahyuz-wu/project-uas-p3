@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Purple Admin</title>
+    <!-- plugins:css -->
+    <link rel="stylesheet" href="../assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="../assets/vendors/ti-icons/css/themify-icons.css">
+    <link rel="stylesheet" href="../assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="../assets/vendors/font-awesome/css/font-awesome.min.css">
+    <!-- endinject -->
+    <!-- Plugin css for this page -->
+    <link rel="stylesheet" href="../assets/vendors/font-awesome/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="../assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css">
+    <!-- End plugin css for this page -->
+    <!-- inject:css -->
+    <!-- endinject -->
+    <!-- Layout styles -->
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <!-- End layout styles -->
+    <link rel="icon" href="../assets/images/favicon.png" />
+
+    <!-- localStorage.removeItem('role'); -->
+
+    <script>
+        const access_TK = localStorage.getItem('access_token');
+        const ro_le = localStorage.getItem('role');
+  
+        if(!access_TK){
+            window.location.href  = '../login.html';
+        } else if (access_TK && ro_le === '2') {
+            window.location.href  = '../index.html';
+        } else if (access_TK && ro_le === '1') {
+            console.log('Akses Sebagai Admin')
+        } else if (access_TK && ro_le !== '2' || access_TK && ro_le !== '1'){
+            alert('Akses tidak dikenal');
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('role');
+            window.location.href = "../login.html";
+        }
+      </script>
+
+  </head>
+  <body>
+    <div class="container-scroller">
+      <!-- partial:partials/_navbar.html -->
+      <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+        <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
+          <a class="navbar-brand brand-logo" href="index.html"><img src="../assets/images/logo.svg" alt="logo" /></a>
+          <a class="navbar-brand brand-logo-mini" href="index.html"><img src="../assets/images/logo-mini.svg" alt="logo" /></a>
+        </div>
+        <div class="navbar-menu-wrapper d-flex align-items-stretch">
+          <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
+            <span class="mdi mdi-menu"></span>
+          </button>
+          <ul class="navbar-nav navbar-nav-right">
+            <li class="nav-item nav-profile dropdown">
+              <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                <div class="nav-profile-img">
+                  <img src="../assets/images/faces/face1.jpg" alt="image">
+                  <span class="availability-status online"></span>
+                </div>
+                <div class="nav-profile-text" id="name-prof">
+
+                  <script>
+                    // elemen untuk menampilkan nama profil
+                    const profile_name = document.getElementById('name-prof');
+                  
+                    // access token dari localStorage
+                    const accessToken = localStorage.getItem('access_token');
+                  
+                      // Kirim token melalui POST untuk mendapatkan data pengguna
+                      fetch('https://backendinfinitywater.hayyalmusafir.com/api/auth/me', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${accessToken}`
+                        },
+                        body: JSON.stringify({
+                          access_token: accessToken // Kirimkan token sebagai bagian dari body
+                        })
+                      })
+          
+                        .then(response => {
+
+                          if (response.status === 401 || response.status === 500) {
+                            alert('Token tidak valid atau telah kedaluwarsa.');
+                            // HMengpus token yang invalid
+                            localStorage.removeItem('access_token');
+                            localStorage.removeItem('role');
+                            window.location.href = 'login.html';
+                            return;
+                          }
+
+                          if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                          }
+                          return response.json();
+                        })
+                        .then(data => {
+                          if (data && data.username) {
+                            profile_name.innerHTML = `<p class="mb-1 text-black">${data.username}</p>`;
+                          } else {
+                            console.error('Username tidak ditemukan dalam respons.');
+                            profile_name.innerHTML = '<p class="text-danger">Gagal memuat username.</p>';
+                          }
+                        })
+                        .catch(error => {
+                          console.error('Error Fetching Profile:', error);
+                          profile_name.innerHTML = '<p class="text-danger">Terjadi kesalahan saat mengambil data.</p>';
+                        });
+                    // }
+                  </script>
+
+                </div>
+              </a>
+              <div class="dropdown-menu navbar-dropdown">
+                <a class="dropdown-item" href="#">
+                  <i class="mdi mdi-account me-2 text-primary"></i> profile</a>
+                <a class="dropdown-item" href="#" onclick="logout()">
+                  <i class="mdi mdi-logout me-2 text-primary"></i> Signout</a>
+                  <script>
+                    function logout() {
+                        localStorage.removeItem('access_token');
+                        localStorage.removeItem('role');
+                        window.location.href = '../login.html';
+                    }
+                  </script>
+              </div>
+            </li>
+          </ul>
+          <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+            <span class="mdi mdi-menu"></span>
+          </button>
+        </div>
+      </nav>
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_sidebar.html -->
+        <nav class="sidebar sidebar-offcanvas" id="sidebar">
+          <ul class="nav">
+            <li class="nav-item nav-profile">
+              <a href="#" class="nav-link">
+                <div class="nav-profile-image">
+                  <img src="../assets/images/faces/face1.jpg" alt="profile" />
+                  <span class="login-status online"></span>
+                  <!--change to offline or busy as needed-->
+                </div>
+                <div class="nav-profile-text d-flex flex-column" id="humm">
+                  <script>
+                    // mengambil elemen untuk menampilkan nama profil
+                    const profile_names = document.getElementById('humm');
+                  
+                    // ini token dari localStorage
+                    const access_Token = localStorage.getItem('access_token');
+                  
+                    // mengirim access token untuk mendapatkan data
+                    fetch('https://backendinfinitywater.hayyalmusafir.com/api/auth/me', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${access_Token}`
+                      },
+                      body: JSON.stringify({
+                        // token berlaku sebagai body
+                        access_token: access_Token
+                      })
+                    })
+                      .then(response => {
+                          if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                          }
+                          return response.json();
+                        })
+                      .then(datas => {
+                        const roleText = datas.role === '1' ? 'ADMIN' : datas.role === '2' ? 'USER' : 'UNKNOWN';
+                        // get dan post name dan role dari respons
+                        if (datas && datas.name && datas.role) {
+                          profile_names.innerHTML = `<span class="font-weight-bold mb-2">${datas.name}</span>
+                                                     <span class="text-secondary text-small">${roleText}</span>`;
+                        } else {
+                          console.error('Nama tidak ditemukan dalam respons.');
+                          profile_names.innerHTML = '<p class="text-danger">Gagal memuat username.</p>';
+                        }
+                      })
+                  </script>
+                </div>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="dashboard.html">
+                <span class="menu-title">Dashboard</span>
+                <i class="mdi mdi-home menu-icon"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="product_admin.html">
+                <span class="menu-title">Product</span>
+                <i class="mdi mdi-bottle-tonic-outline menu-icon"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="list_pelanggan.html">
+                <span class="menu-title">List Pelanggan</span>
+                <i class="mdi mdi-account-group menu-icon"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="show_pemesanan.html">
+                <span class="menu-title">List Pemesanan</span>
+                <i class="mdi mdi-cart menu-icon"></i>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <!-- partial -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+              <div class="page-header">
+                <h3 class="page-title">
+                  <span class="page-title-icon bg-gradient-primary text-white me-2">
+                      <i class="mdi mdi-account"></i>
+                  </span> Profile ADMIN
+                </h3>
+              </div>
+              <div class="row">
+                  <div class="col-12 grid-margin stretch-card">
+                      <div class="card">
+                        <div class="card-body">
+                          <form class="forms-sample" id="profile_pp">
+                            <script>
+                                // mengambil elemen untuk menampilkan nama profil
+                                const profile_namess = document.getElementById('profile_pp');
+                              
+                                // ini token dari localStorage
+                                const acc = localStorage.getItem('access_token');
+                              
+                                // mengirim access token untuk mendapatkan data
+                                fetch('https://backendinfinitywater.hayyalmusafir.com/api/auth/me', {
+                                  method: 'POST',
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${acc}`
+                                  },
+                                  body: JSON.stringify({
+                                    // token berlaku sebagai body
+                                    access_token: acc
+                                  })
+                                })
+                                  .then(response => {
+                                      if (!response.ok) {
+                                        throw new Error(`HTTP error! status: ${response.status}`);
+                                      }
+                                      return response.json();
+                                    })
+                                  .then(datas => {
+                                    const roleText = datas.role === '1' ? 'ADMIN' : datas.role === '2' ? 'USER' : 'UNKNOWN';
+                                    // get dan post name dan role dari respons
+                                    if (datas && datas.name && datas.role && datas.username && datas.email) {
+                                      profile_namess.innerHTML = `<div class="form-group">
+                                                                    <label for="exampleInputUsername1">Username</label>
+                                                                    <input type="text" class="form-control" id="exampleInputUsername1" placeholder="Username" value="${datas.username}">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="exampleInputUsername1">Name</label>
+                                                                    <input type="text" class="form-control" id="exampleInputUsername1" placeholder="Username" value="${datas.name}">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="exampleInputEmail1">Email address</label>
+                                                                    <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email" value="${datas.email}">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="exampleInputEmail1">Role</label>
+                                                                    <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Role" value="${roleText}">
+                                                                </div>`;
+                                    } else {
+                                      console.error('Nama tidak ditemukan dalam respons.');
+                                      profile_names.innerHTML = '<p class="text-danger">Gagal memuat username.</p>';
+                                    }
+                                  })
+                              </script>
+                            <!--<div class="form-check form-check-flat form-check-primary">
+                              <label class="form-check-label">
+                                <input type="checkbox" class="form-check-input"> Remember me </label>
+                            </div>
+                            <button type="submit" class="btn btn-gradient-primary me-2">Submit</button>
+                            <button class="btn btn-light">Cancel</button> -->
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+              </div>
+            </div>
+            <!-- content-wrapper ends -->
+            <!-- partial:../../partials/_footer.html -->
+            <footer class="footer">
+              <div class="d-sm-flex justify-content-center justify-content-sm-between">
+                <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2023 <a href="https://www.bootstrapdash.com/" target="_blank">BootstrapDash</a>. All rights reserved.</span>
+                <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Hand-crafted & made with <i class="mdi mdi-heart text-danger"></i></span>
+              </div>
+            </footer>
+            <!-- partial -->
+          </div>
+        <!-- main-panel ends -->
+      </div>
+      <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller -->
+    <!-- plugins:js -->
+    <script src="../assets/vendors/js/vendor.bundle.base.js"></script>
+    <!-- endinject -->
+    <!-- Plugin js for this page -->
+    <script src="../assets/vendors/chart.js/chart.umd.js"></script>
+    <script src="../assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
+    <!-- End plugin js for this page -->
+    <!-- inject:js -->
+    <script src="../assets/js/off-canvas.js"></script>
+    <script src="../assets/js/misc.js"></script>
+    <script src="../assets/js/settings.js"></script>
+    <script src="../assets/js/todolist.js"></script>
+    <script src="../assets/js/jquery.cookie.js"></script>
+    <!-- endinject -->
+    <!-- Custom js for this page -->
+    <script src="../assets/js/dashboard.js"></script>
+    <!-- End custom js for this page -->
+
+    <script>
+      let jumlah_awal = 0;
+      const maksimalRefresh = 3;
+    
+      async function refreshToken() {
+        const accToken = localStorage.getItem('access_token');
+        try {
+          // melakukan refrsh ygy
+          const response = await fetch('https://backendinfinitywater.hayyalmusafir.com/api/auth/refresh', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accToken}`
+            },
+            body: JSON.stringify({ 
+              access_token: accToken 
+            })
+          });
+    
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+    
+          const data = await response.json();
+          if (data.access_token) {
+            localStorage.setItem('access_token', data.access_token);
+            jumlah_awal++;
+            console.log(`Token berhasil diperbarui. Refresh ke-${jumlah_awal}`);
+          } else {
+            throw new Error('Token baru tidak ditemukan dalam respons API.');
+          }
+
+          if (jumlah_awal >= maksimalRefresh) {
+            alert('AKSES ANDA TELAH BERAKHIR, SILAHKAN MELAKUKAN LOGIN ULANG!!!');
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('role');
+                window.location.href = 'login.html';
+          }
+
+        } catch (error) {
+          console.error('Gagal memperbarui token:', error);
+          alert('Gagal memperbarui token. Silakan Melakukan login ulang.');
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('role');
+          window.location.href = 'login.html';
+        }
+      }
+    
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log('Token Valid')
+    
+        // ini cd 50 menit
+        setInterval(() => {
+          console.log('Token Tidak Valid, Memperbarui token...');
+          refreshToken().catch(error => console.error('Gagal memperbarui token:', error));
+        }, 3000 * 1000);
+      });
+    </script>
+
+  </body>
+</html>
